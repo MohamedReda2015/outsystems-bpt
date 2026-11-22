@@ -3,11 +3,11 @@ name: outsystems-bpt
 description: Design, review and troubleshoot OutSystems 11 BPT and Light BPT processes, task inboxes, retries, cancellation and live-instance upgrades. Includes a process inventory checker. Use for O11 process orchestration; use outsystems-cmf for CMF case behavior. ODC Workflows require their own platform guidance.
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   updated: "2026-11-22"
   platform: OutSystems 11 (Reactive Web, Mobile, Traditional Web); ODC notes
   agent-independent: "true"
-  companion-skills: outsystems-architecture (layers, modules, ARC/HSE/DAT/SEC/INT rule IDs); outsystems-backend-conventions (BL logic, transactions, errors, timers, BLG/BTX/BER/BAS IDs); outsystems-frontend-conventions (screens, blocks, task UI, FET/CLG/ERR IDs); outsystems-cmf (Case Management Framework on top of BPT); outsystems-live-style-guide (look)
+  companion-skills: outsystems-architecture (layers, modules, ARC/HSE/DAT/SEC/INT rule IDs); outsystems-backend-conventions (BL logic, transactions, errors, timers, BLG/BTX/BER/BAS IDs); outsystems-frontend-conventions (screens, blocks, task UI, FET/CLG/ERR IDs); outsystems-cmf (Case Management Framework on top of BPT); outsystems-live-style-guide (look); outsystems-ai-mentor (end-to-end lifecycle orchestrator)
 ---
 
 # OutSystems BPT
@@ -20,6 +20,7 @@ metadata:
 - Preserve the user's requested scope and existing authorization. Continue routine reversible work; a skill does not authorize publishing, dependency changes or production operations beyond that scope. Do not introduce phase-by-phase approval unless the user or environment requires it.
 - Prefer installed API signatures and version-matched official documentation. A repository development branch, community workaround or old project observation is evidence to investigate, not a release guarantee.
 - Report evidence separately: **prepared → model validated → merged → published → runtime verified**. A static checker passing proves only its covered checks on the supplied inventory. Unknown, blocked and not tested remain explicit.
+- Agent work through the Service Studio MCP follows the shared MCP reference in outsystems-architecture (its `service-studio-mcp` reference, rule `OPS-10`): confirm the environment with the user (the MCP can't report it) and stay in Development; one writer per module and a fresh edit session after any human edit or partial merge; read back every write and lay out its flows before merging; keep an agent change log; publish only on an explicit yes. For processes: the O11 API is `eSpace.CreateProcess` (`OutSystems.Model.Processes`); `CreateBusinessProcess` is the ODC Workflows API and fails on O11. Process writes are Beta with a hand-verified API: review the flow in Service Studio's process editor after every merge.
 - Read [verification and reliability](references/verification-and-reliability.md) when changing data contracts, concurrent operations, runtime behavior or verification. It contains the concrete acceptance checks and sources for this skill.
 
 
@@ -38,6 +39,7 @@ It works for any agent (Claude, Copilot, Cursor, Codex, Gemini, a custom LLM age
 
 | Question | Skill |
 |---|---|
+| A whole app or feature delivered end to end — phases, gates, increments, which steps the O11 MCP can do and which are manual | **outsystems-ai-mentor** (orchestrates this skill and its companions) |
 | Which module and layer, who may reference whom, app composition, deployment SOPs | **outsystems-architecture** |
 | How BL actions, transactions, errors, integrations and timers are written | **outsystems-backend-conventions** |
 | How screens, blocks, client actions and forms are written | **outsystems-frontend-conventions** |

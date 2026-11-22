@@ -85,6 +85,7 @@ Every rule has an ID, a severity and a check. Cite the ID in findings. IDs stay 
 | PVR-05 | Minor | Process deployments avoid business peaks and running launch bursts | Reschedule |
 | PVR-06 | Major | Before deploying a process change to an environment with live instances, the Service Center Impact Analysis is run in **preview** mode and its result is in the deployment notes | Run preview, adjust the change |
 | PVR-07 | Major | After every deployment that touches a process, suspended instances are reviewed and each is resumed or terminated deliberately | Add to the deployment checklist |
+| PVR-08 | Major | Processes changed by an agent through the Service Studio MCP use the O11 process API (`eSpace.CreateProcess`, never ODC `CreateBusinessProcess`), are reviewed in Service Studio's process editor after merge, and have their effect on running instances assessed before publish | Read the flow back; review in the process editor; run the live-instance checks of this group before publishing |
 
 ## POP — Operations, data and capacity
 | ID | Sev | Rule | Check / fix |

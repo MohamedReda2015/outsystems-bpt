@@ -17,6 +17,12 @@
 
 All notable changes to this skill. Versions follow [semantic versioning](https://semver.org/) of `metadata.version` in `SKILL.md`.
 
+## 1.3.0 — 2026-11-22
+Cross-skill review: recent OutSystems changes (Convert to Reactive GA, Performance Analytics Beta, OutSystems UI 3.0 GA, Code Quality as the current name of AI Mentor Studio, O11 MCP contract 2 and governance) and lessons from agent-driven projects.
+- New rules: `PVR-08`.
+- SKILL.md points to the shared Service Studio MCP reference (architecture `OPS-10`) with this domain's MCP pitfalls.
+- Companion table adds **outsystems-ai-mentor** for end-to-end delivery.
+
 ## 1.2.0 — 2026-11-22
 Prepared for public release on GitHub.
 

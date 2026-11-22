@@ -106,3 +106,9 @@ Big redesigns: a new process (`RequestApprovalV2`) for new records while the old
 - **Process path tests** in a test environment: happy path, each Decision outcome, rework limit, timeout/escalation (with short configured durations), cancel at each stage, forced step failure + retry, concurrent completion, wrong user completing.
 - **Version-change test** for every release that touches a process (§5 step 5).
 - Do not leave test screens or "launch process" buttons in modules (`ARC-08`); use the admin back office with its role.
+
+
+## Agent edits through the Service Studio MCP (`PVR-08`)
+- Use the O11 process API: `eSpace.CreateProcess` and the node types in `OutSystems.Model.Processes.Nodes`. `eSpace.CreateBusinessProcess` is the ODC Workflows API and fails on an O11 module.
+- The official MCP skill documents the process API only as a hand-verified summary: keep each change small, read it back, and **review the flow in Service Studio's process editor** before merging.
+- A publish changes how **running instances** continue: apply this file's live-instance rules before asking the user to publish, and never publish a process change without that yes.
