@@ -60,3 +60,13 @@ Owner: <team/person> · Module: <App>_BL | <Concept>_BPT · Version: <n> · Date
 
 ## 12. Test scenarios
 Happy path · each Decision outcome · rework limit · timeout/escalation · cancel at each stage · forced step failure + retry · concurrent completion · wrong user completes · double submit · version change with in-flight instances.
+
+
+## Evidence and acceptance
+
+- Platform/app type, installed versions/theme where relevant, target environment:
+- Existing project decisions and authorized delivery scope:
+- Requirement → element/contract → source of data → verification evidence:
+- Concurrency, retry/unknown outcome, authorization and failure cases relevant to this change:
+- Delivery status: prepared / model validated / merged / published / runtime verified (record only observed stages):
+- Not tested, missing dependency or blocked evidence, and the exact next step:

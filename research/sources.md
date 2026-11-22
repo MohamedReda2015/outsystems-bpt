@@ -5,7 +5,7 @@ Where the skill's platform facts come from, and how strong each source is. **Off
 ## Official / mirror of official docs
 | Topic | Source | Facts used |
 |---|---|---|
-| Processes overview, launching | Mirror: `testsssssss.readthedocs.io/en/latest/develop/processes/intro/` and `.../processes/process/` | Launch On (Create entity action adds the entity id input), explicit launch via process extended actions, Execute Process; on Oracle/DB2 commit before launching; cycles create new activity instances |
+| Processes overview, launching | [Official Processes source](https://github.com/OutSystems/docs-product/blob/master/src/building-apps/processes/intro.md) and [Launch Process](https://github.com/OutSystems/docs-product/blob/master/src/building-apps/processes/actions-extended/launch-process-action.md) | Launch On (Create entity action adds the entity id input), explicit launch via process extended actions, Execute Process; on Oracle/DB2 commit before launching; cycles create new activity instances |
 | Process extended actions | Mirror: `.../processes/actions-extended/intro/` | `Launch<Process>` (output Id), `Close<HumanActivity>`, `Close<Wait>`, `Start<ConditionalStart>` |
 | Close human activity | Mirror: `.../actions-extended/close-human-activity-action/` | `Close<HumanActivity>(ActivityId, outputs…)`; ActivityId from the runtime property `ActivityId` |
 | Light processes | Mirror: `.../processes/light-process/`; official product update "Core business processes – scalable database queueing" (outsystems.com/product-updates) | Start → Automatic Activity → End; database-event launch; Expose Process Entity = No; enable "Light process execution" in Service Center → module → Operation tab, then republish; no process/activity instances or history; no start dates on automatic activities; .NET with SQL Server/Oracle |
@@ -37,3 +37,8 @@ Where the skill's platform facts come from, and how strong each source is. **Off
 | Data growth | Forum 27397; Ideas 10826; OutSystems best-practices "archive" (GitHub OutSystems/docs-bestpractices) | No automatic BPT cleanup; activity table growth slows queries; plan archiving |
 
 Unreachable during research (HTTP 403): two itnext.io articles on BPT monitoring and asynchronous processes, and a Medium article on Light processes. Their key points were covered by the forum thread above.
+
+
+## Reliability review — 2026-11-22
+
+See [verification and reliability](../references/verification-and-reliability.md) for primary sources, provenance and acceptance cases. Platform facts are separated from house policy and anonymized project observations. A community mirror is not an official publication; installed contracts and version-matched official sources take precedence. Runtime claims were not retested in a live tenant during this documentation review.

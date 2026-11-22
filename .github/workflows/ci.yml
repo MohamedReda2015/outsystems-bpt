@@ -27,6 +27,9 @@ jobs:
       - name: Checker regression
         run: node scripts/test_check_bpt.mjs
 
+      - name: Asynchronous activity closure behavior
+        run: node --test tests/check-bpt.test.mjs
+
       - name: Checker exit codes (clean = 0, bad = 1)
         run: |
           node scripts/check-bpt.mjs scripts/example_inventory.json

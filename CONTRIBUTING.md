@@ -35,5 +35,13 @@ node scripts/test_check_bpt.mjs     # checker regression
 - Update `CHANGELOG.md` (under *Unreleased*, or a new version). Bump `metadata.version` in `SKILL.md` for releases (semantic versioning: new rules = minor, wording fixes = patch, a changed meaning of existing IDs = major).
 - If you changed `adapters/core-rules.md`, copy the same text into the marked blocks of `adapters/AGENTS.md` and `adapters/copilot-instructions.md` (CI checks they match).
 
+## Reliability review guidance
+
+Use `PRV` for verification and reliability review rules. These are manual acceptance checks unless a script explicitly implements them. Keep platform facts, house conventions and observed project lessons distinct, and link primary sources from `references/verification-and-reliability.md`.
+
+Run `node --test tests/check-bpt.test.mjs` as well as the existing checker regression. These cases distinguish event-driven closure with a pending UI from closure in the activity’s own On Ready.
+
+Run repository maintenance checks from a full Git checkout. Release archives intentionally exclude these scripts; installed skill packages still include the runtime validators.
+
 ## Code of conduct
 By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

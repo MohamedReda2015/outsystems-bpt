@@ -52,13 +52,13 @@ for (const f of files.filter((x) => x.endsWith(".md"))) {
 
 // 3. Own rule IDs: defined once in the checklist (or lessons), every cited own ID defined
 const checklist = read("references/review-checklist.md");
-const defined = [...checklist.matchAll(/^\| ((?:PAR|PDS|PHA|PAA|PLT|PEX|PVR|POP|PSC|PNM)-\d+) \|/gm)].map((m) => m[1]);
+const defined = [...checklist.matchAll(/^\| ((?:PAR|PDS|PHA|PAA|PLT|PEX|PVR|POP|PSC|PNM|PRV)-\d+) \|/gm)].map((m) => m[1]);
 const lessons = [...read("references/lessons-learned.md").matchAll(/\*\*(PLL-\d+)/g)].map((m) => m[1]);
 const all = [...defined, ...lessons];
 const dup = all.filter((id, i) => all.indexOf(id) !== i);
 if (dup.length) errors.push(`duplicate rule IDs ${[...new Set(dup)].join(", ")}`);
 const definedSet = new Set(all);
-const idRe = /\b(PAR|PDS|PHA|PAA|PLT|PEX|PVR|POP|PSC|PNM|PLL)-(\d+)\b/g;
+const idRe = /\b(PAR|PDS|PHA|PAA|PLT|PEX|PVR|POP|PSC|PNM|PRV|PLL)-(\d+)\b/g;
 for (const f of files.filter((x) => /\.(md|mjs|json|mdc)$/.test(x) && !x.startsWith(".github/"))) {
   for (const m of read(f).matchAll(idRe)) {
     if (!definedSet.has(m[0])) errors.push(`${f}: cites undefined rule ${m[0]}`);

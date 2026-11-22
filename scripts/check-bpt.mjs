@@ -26,7 +26,7 @@
 //       { "type": "human", "name": "ReviewRequest", "description": "…",
 //         "assignment": "role" | "group" | "user" | "none", "sla": "config" | "literal" | null,
 //         "usesDestination": false, "callsBl": ["Task_CreateForActivity_Logic"], "inlineData": false, "nodes": 3,
-//         "closedBy": "closeAction" | "entityEvent", "closesInOnReady": false },
+//         "closedBy": "closeAction" | "entityEvent", "pendingProgressHandled": true, "closesInOnReady": false },
 //       { "type": "automatic", "name": "NotifyRequester", "description": "…",
 //         "callsBl": ["Request_NotifyRequester_Logic"], "inlineData": false, "nodes": 4,
 //         "longRunning": false, "boundedRetry": true,
@@ -84,7 +84,7 @@ for (const p of inv.processes) {
 
   // PAR-01 placement
   const sfx = suffixOf(p.module);
-  const allowed = p.light ? ["BL", "BPT", "Sync", "Eng"] : ["BL", "BPT"];
+  const allowed = p.light ? ["BL", "BPT", "WF", "Sync", "Eng"] : ["BL", "BPT", "WF"];
   if (!allowed.includes(sfx))
     add("PAR-01", "Major", at(), `process lives in '${p.module || "?"}'; expected a module ending in ${allowed.map((s) => "_" + s).join(", ")}`);
 
@@ -161,8 +161,8 @@ for (const p of inv.processes) {
       } else if (a.sla === "literal") add("POP-04", "Major", w, "SLA duration is a literal; read it from configuration");
       if (a.usesDestination === true && (appType === "mobile" || (appType === "reactive" && psBelow(11, 8))))
         add("PHA-08", "Major", w, `uses activity Destination, unavailable for ${appType === "mobile" ? "Mobile screens" : "Reactive below Platform Server 11.8"}; navigate from the task-entity inbox`);
-      if (a.closedBy === "entityEvent")
-        add("PHA-10", "Major", w, "closed by an entity event (asynchronous); close with Close<HumanActivity>/ActivityClose in the completion use case");
+      if (a.closedBy === "entityEvent" && a.pendingProgressHandled !== true)
+        add("PHA-10", "Major", w, "entity-event closure is asynchronous; document pending progression in the UI or use an explicit close with verified semantics");
       if (a.closesInOnReady === true) add("PHA-10", "Major", w, "activity is closed inside its own On Ready");
     }
 

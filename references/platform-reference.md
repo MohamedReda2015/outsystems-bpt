@@ -31,7 +31,7 @@ What the platform gives you, and its known limits, with the strength of each sou
 
 **Exceptions in callbacks**: raising an **Abort Activity Change** exception in an activity callback prevents the activity from moving to its next state (use for "On Close" guards). Community reports say it is not logged as an error in Service Center *(verify)* — log it yourself if you need the trail.
 
-**Closing behaviour** (OutSystems staff answer): activities closed by entity events progress **asynchronously**; `Close<HumanActivity>` / `ActivityClose` called from logic progress **synchronously**, so the next activity is ready when the next screen loads. Closing an activity inside its **own On Ready** has been reported to hang — don't.
+**Closing behaviour**: the generated close action closes the current human activity server-side; entity-event progression is asynchronous. A historical staff observation about synchronous progression is not a guarantee that every downstream callback or next inbox row is ready. Verify the installed version and expose a pending state. Closing an activity inside its **own On Ready** has been reported to hang — don't.
 
 ## 3. System and process entities (read-only)
 

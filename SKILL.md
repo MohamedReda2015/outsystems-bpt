@@ -1,16 +1,27 @@
 ---
 name: outsystems-bpt
-description: OutSystems BPT (Business Process Technology) standards for O11 on the 3-layer Canvas and the house Front_End → CW → BL → CS chain — choosing BPT vs Light BPT vs timer vs outbox; where processes live; explicit launch; ids-only process data; business status vs process state; task entity and inbox for Reactive/Mobile; assignment, claim, completion and delegation with server-side checks; SLAs, escalation, cancellation, parallel approvals; idempotent automatic activities; errors, recovery, monitoring; changing live processes safely; data growth. Includes a process checker, templates and lessons from real projects. Use it whenever an agent designs, builds, reviews, debugs or explains an OutSystems process, workflow, approval flow, task inbox, human or automatic activity or Light BPT handler, even if the user only says "add an approval step", "make this async", "the task doesn't show up" or "the process is stuck".
+description: Design, review and troubleshoot OutSystems 11 BPT and Light BPT processes, task inboxes, retries, cancellation and live-instance upgrades. Includes a process inventory checker. Use for O11 process orchestration; use outsystems-cmf for CMF case behavior. ODC Workflows require their own platform guidance.
 license: MIT
 metadata:
   version: 1.2.0
-  updated: 2026-11-22
+  updated: "2026-11-22"
   platform: OutSystems 11 (Reactive Web, Mobile, Traditional Web); ODC notes
-  agent-independent: true
+  agent-independent: "true"
   companion-skills: outsystems-architecture (layers, modules, ARC/HSE/DAT/SEC/INT rule IDs); outsystems-backend-conventions (BL logic, transactions, errors, timers, BLG/BTX/BER/BAS IDs); outsystems-frontend-conventions (screens, blocks, task UI, FET/CLG/ERR IDs); outsystems-cmf (Case Management Framework on top of BPT); outsystems-live-style-guide (look)
 ---
 
 # OutSystems BPT
+
+## Scope, evidence and consistency
+
+- Run bundled scripts from the skill directory or use absolute paths; do not assume they exist in the application checkout.
+- Establish O11/ODC, application type, installed component versions and the target environment from available evidence; ask only for information that changes the work.
+- Separate **platform facts**, **house defaults**, **project decisions** and **observed lessons**. Project conventions choose among supported designs; they cannot change runtime behavior. The FE/CW/BL/CS chain is an O11 house pattern, not an ODC requirement.
+- Preserve the user's requested scope and existing authorization. Continue routine reversible work; a skill does not authorize publishing, dependency changes or production operations beyond that scope. Do not introduce phase-by-phase approval unless the user or environment requires it.
+- Prefer installed API signatures and version-matched official documentation. A repository development branch, community workaround or old project observation is evidence to investigate, not a release guarantee.
+- Report evidence separately: **prepared → model validated → merged → published → runtime verified**. A static checker passing proves only its covered checks on the supplied inventory. Unknown, blocked and not tested remain explicit.
+- Read [verification and reliability](references/verification-and-reliability.md) when changing data contracts, concurrent operations, runtime behavior or verification. It contains the concrete acceptance checks and sources for this skill.
+
 
 This skill makes an agent design, build and review OutSystems processes (BPT) the way a senior OutSystems architect expects to find them in production:
 - **the right tool for async work**: BPT only where a stateful, multi-step or human workflow needs it;
@@ -36,12 +47,9 @@ It works for any agent (Claude, Copilot, Cursor, Codex, Gemini, a custom LLM age
 
 When they overlap, the architecture skill owns *where*, the backend skill owns *how server code is written*, and this skill owns *the process model and its contract with BL and the UI*. It cites their rule IDs (`HSE-03`, `BLG-05`, `BTX-05`, `SEC-09`…) and adds its own: `PAR` placement, `PDS` design, `PHA` human activities, `PAA` automatic activities, `PLT` Light BPT, `PEX` errors and recovery, `PVR` versioning, `POP` operations, `PSC` security, `PNM` naming, `PLL` lessons.
 
-## Precedence of rules
-1. **The project's own conventions** (AGENTS.md, blueprint, workflow design already in force). Follow them, and say so.
-2. **This house standard.**
-3. **OutSystems official guidance** (BPT docs, Architecture Canvas, Code Quality). Community practice only fills gaps.
+## Applying conventions
 
-If a project rule conflicts with a **security** or **live-instance safety** rule (`PSC-*`, `PHA-01`, `PVR-01`), flag the risk and ask. Never silently follow it, never silently rework built processes. Record the decision in the project's AGENTS.md.
+Use the project's documented architecture, naming and design choices where supported. Use this skill's house defaults when the project has no decision. Official documentation and installed contracts determine platform behavior; house preferences never override those facts. Record a consequential deviation and its reason. Escalate unresolved security, data-integrity or compatibility conflicts, not ordinary naming or layout choices.
 
 ## Processes on the 3-layer Canvas
 
@@ -64,7 +72,7 @@ FOUNDATION  <Concept>_IS      External calls made by activities. <Name>_Lib: log
 Dependencies point down only (`ARC-01`, `ARC-10`, `HSE-01`). A CS never holds a process; FE, CW, IS and Lib never hold processes (`PAR-01`). Full placement rules: `references/architecture-and-placement.md`.
 
 ## Step 0: establish context (before modeling anything)
-1. **Platform**: O11 (Platform Server version) or ODC (ODC uses Workflows, not BPT: `references/platform-reference.md` §8). App type and version: Reactive gets human activity **Destination only from Platform Server 11.8**; the Taskbox is Traditional Web. In every case you build the inbox on a task entity (`PHA-08`). Module type: **human activities are not available in Service modules** (`PAR-09`).
+1. **Platform**: O11 (Platform Server version) or ODC (ODC uses Workflows, not BPT: `references/platform-reference.md` §8). App type and version: Reactive gets human activity **Destination only from Platform Server 11.8**; the Taskbox is Traditional Web. Choose the inbox source deliberately: an application task projection where needed, or CMF’s task store when CMF is installed; avoid duplicate ownership (`PHA-08`). Module type: **human activities are not available in Service modules** (`PAR-09`).
 2. **Is a process the right tool?** Run the decision table in `references/choosing-async-mechanism.md`. Many "workflows" are a status field + use-case actions + a timer.
 3. **What exists**: existing processes, the task entity, groups and roles, the logging action, `ActionResult`, the transition table, `_IS` modules, config entity. **Reuse before creating.**
 4. **Live instances**: if you are changing an existing process, count live instances per activity first (`PVR-01`).
@@ -105,8 +113,8 @@ Record the choice and the reason in the process spec (`PDS-01`).
 - Mirror every human activity in an **`<App>Task` row** (CS) created in **On Ready** and closed on completion; the inbox, SLAs, delegation and reporting read that entity (`PHA-03`).
 - Assign to a **role or group** resolved by BL (`<Concept>_GetAssignees_Logic`), never a hard-coded user (`PHA-02`).
 - Group tasks are **claimed** before work (`ActivityStart` / assign to user) so two people never complete the same task (`PHA-05`).
-- Completion **closes the activity synchronously** with `Close<HumanActivity>` / `ActivityClose` — entity-event closes are asynchronous, so the next task is missing when the screen reloads (`PHA-10`).
-- Completion is **one use-case action per task kind** — `Request_Approve(TaskId, Comment)` — that re-checks on the server: current user is the assignee, task open, outcome valid, record in the expected state; then writes outcome + history and closes the activity in one transaction (`PHA-01`, `PHA-04`, `SEC-09`).
+- Choose explicit `Close<HumanActivity>` / `ActivityClose` or entity-event completion deliberately (`PHA-10`). Read the installed action’s commit semantics. Closing the current activity does not prove that downstream asynchronous work or the next inbox item is ready; the UI must handle pending progression.
+- Completion is **one use-case action per task kind** — `Request_Approve(TaskId, Comment)` — that re-checks on the server: current user is the assignee, task open, outcome valid, record in the expected state; then writes outcome + history and closes the activity under a verified transaction/commit plan (`PHA-01`, `PHA-04`, `SEC-09`).
 - Notifications on assignment go through an outbox; they never fail the activity (`PHA-06`, `BTX-06`).
 
 ### 6. Automatic activities: short, idempotent, observable (`references/automatic-activities-and-light-bpt.md`)
@@ -141,15 +149,15 @@ No `HumanActivity1`, `AutomaticActivity2`, `Wait1`, `Decision1` (`PNM-02`). Ever
 ## How to work
 
 ### Designing or building a process
-1. Do Step 0. Fill `templates/process-spec.md` (trigger, inputs, steps, roles, SLAs, errors, cancel, versioning) and get it approved before building.
+1. Do Step 0. Fill `templates/process-spec.md` (trigger, inputs, steps, roles, SLAs, errors, cancel, versioning) and resolve material ambiguities before building; reuse the authorization already given.
 2. Build **bottom-up**: CS (status field, transition table, `<App>Task`, `<Concept>History`, event entity) → BL (`_Logic` step actions, assignment, task use-case actions, launch inside the submit action) → process in BL/`_BPT` → CW task blocks → FE task screens.
 3. Name and describe every element as you create it.
 4. Run the checker on an inventory of the process (hand-written or exported via Service Studio MCP read tools):
    ```
    node scripts/check-bpt.mjs <inventory.json> [--json]
    ```
-5. **Verify on the platform** (`PLL-12`): publish; launch from the real use case; watch it in Service Center → Monitoring → Processes; walk the happy path, rejection, rework limit, timeout/escalation, cancel mid-flight, a forced activity error and its retry, a second user trying to complete someone else's task, and a double-click on Approve. Report what you saw, not what you built.
-6. Finish with the build report from the architecture skill (`templates/build-report.md` there).
+5. **Verify on the platform** (`PLL-12`): publish when authorized; launch from the real use case; watch it in Service Center → Monitoring → Processes; walk the happy path, rejection, rework limit, timeout/escalation, cancel mid-flight, a forced activity error and its retry, a second user trying to complete someone else's task, and a double-click on Approve. Report what you saw, not what you built.
+6. Finish with the build report from the architecture skill (`build-report.md` in the architecture skill’s templates directory when installed; otherwise report the evidence stages and remaining work from this skill’s templates).
 
 ### Reviewing
 1. Step 0, then run `scripts/check-bpt.mjs` on what you can export.

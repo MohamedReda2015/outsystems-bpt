@@ -143,7 +143,8 @@ git archive --format=zip --prefix=outsystems-bpt/ -o outsystems-bpt.zip HEAD
 ## Contributing
 Rule proposals, corrections (especially platform behaviour on specific Platform Server versions) and real-world lessons are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md): cite a source, paraphrase, include no confidential data, keep rule IDs stable, and run the checks:
 ```bash
-node scripts/check_skill.mjs && node scripts/test_check_bpt.mjs
+node --test
+node scripts/check-bpt.mjs scripts/example_inventory.json --json
 ```
 Also see the [Code of Conduct](CODE_OF_CONDUCT.md) and the [Security policy](SECURITY.md).
 
@@ -152,3 +153,18 @@ This is an independent community project. It is **not affiliated with, endorsed 
 
 ## License
 [MIT](LICENSE).
+
+
+## Reliability review (Unreleased)
+
+The updated guidance separates installed platform behavior, house conventions and observed project lessons. Read [verification and reliability](references/verification-and-reliability.md) for domain acceptance checks and primary sources. Changes are recorded under Unreleased; this does not declare a new upstream release.
+
+Repository maintenance checks (full Git checkout):
+
+```sh
+node scripts/check_skill.mjs
+node scripts/test_check_bpt.mjs
+node --test tests/check-bpt.test.mjs
+```
+
+These maintenance scripts are excluded from the release archive.

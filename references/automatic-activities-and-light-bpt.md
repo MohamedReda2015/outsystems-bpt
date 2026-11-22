@@ -27,7 +27,7 @@ Every automatic step must be safe to run twice:
 ## 4. Identity in background steps (`PAA-03`)
 
 - Audit columns: the CRUD wrapper sets `UpdatedBy` from `GetUserId()`, which is the system context here. Decide once per factory: a dedicated **system user** id from config, or the stored actor (`Request.SubmittedBy`) passed explicitly to a `_Logic` overload. Document it.
-- Authorization in step logic: background steps are trusted callers; they call `_Logic` actions (no role check), never the public Service Action that checks the end-user role (`BLG-01`).
+- Background steps use a same-module private `_Logic` action or an explicitly restricted background contract. Preserve tenant, record-scope and current-state checks; a stored initiator is audit provenance, not current authorization. Keep client-reachable actions protected (`BLG-01`).
 - Never use `GetUserId()` to decide whose task or whose record it is.
 
 ## 5. Errors and retries (`PAA-04`, `PAA-05`)
@@ -90,10 +90,10 @@ BL   Process HandleRequestEvent  (Light)  Launch On: Create <Concept>Event
             2. kill switch on? → leave New, return                       PLT-05
             3. dispatch by Type to step logic (each idempotent)
             4. Status = Processed, ProcessedOn = now
-            on exception: Attempts + 1, LastError = masked message,
+            on expected failure: rollback partial business work, then persist Attempts + 1, LastError = masked message,
                           Status = Failed (or Dead when Attempts ≥ max), NextAttemptOn = backoff;
                           log with EventId; do NOT re-raise (the sweeper retries)
-BL   Timer_RetryFailedEvents (every few minutes): Failed rows with NextAttemptOn ≤ now → reprocess via the same _Logic, in batches
+BL   Timer_RetryFailedEvents (every few minutes): eligible New rows after resume, due Failed rows and expired Processing leases → atomically claim and reprocess via the same _Logic, in batches
 ```
 - Trigger on the **event entity**, never the main business entity (`PLT-02`, `PAR-04`).
 - Because Light BPT keeps no history, **the event row is the history and the monitor** (`POP-01`, `PEX-03`). Purge `Processed` events after the retention period with a timer.

@@ -84,16 +84,16 @@ Request_Approve(TaskId, Comment) : ActionResult            (public Service Actio
        close the activity synchronously: Close<HumanActivity>(ActivityId, Outcome…) or ActivityClose   PHA-10
   5. Return ActionResult (expected failures as Errors[], not exceptions)   BER-05
 ```
-- **Close synchronously** (`PHA-10`). Closing through an entity event (the activity's Close On, or a Wait on Update) progresses **asynchronously**: the user lands on the next screen before the next activity exists, and the inbox looks stale (OutSystems staff answer). `Close<HumanActivity>` / `ActivityClose` from the use case moves the process in the same request.
+- **Choose closure semantics** (`PHA-10`). Explicit server-side close confirms the current activity; entity-event progression is asynchronous. Verify commit behavior and downstream timing. The next activity/inbox row may still be pending, so expose that state instead of guaranteeing immediate availability.
 - `TaskId`/`ActivityId` from the client is **only a pointer**: every check is redone on the server (`SEC-01`, `SEC-09`).
 - Identity is `GetUserId()`; never a `UserId` input.
-- All writes and the activity close are **one transaction**: either the task is completed and the process moves, or nothing happened.
+- Map the close action’s commit semantics and every remote call. Keep business/task writes together up to the applicable boundary and test partial failures. One wrapper is not proof that all process progression can roll back.
 - The process reads the outcome from the task row (or the activity output) in the next Decision — not from a client-supplied value.
 
 ## 5. Claim and concurrency (`PHA-05`)
 
 - Group/role tasks: the first user to **claim** owns it; others see it as "In progress by <name>" and cannot complete it.
-- Completion uses a row lock or an optimistic `UpdatedOn` check, so a double-click or two simultaneous approvers produce one completion and one friendly "already completed" result.
+- Completion uses a row lock through the write or an atomic conditional version update, so a double-click or two simultaneous approvers produce one completion and one friendly "already completed" result.
 - Auto-release of claimed-but-idle tasks after a configured time (timer), if the business wants it.
 
 ## 6. The inbox (`PAR-08`, `PSC-02`)

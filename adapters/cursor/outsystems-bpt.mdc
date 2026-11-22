@@ -10,3 +10,5 @@ Follow the OutSystems BPT skill in `outsystems-bpt/` (copy that folder into the 
 2. The core rules in `outsystems-bpt/adapters/core-rules.md` are always in force.
 3. For reviews, cite rule IDs from `references/review-checklist.md`, and run `node outsystems-bpt/scripts/check-bpt.mjs <inventory.json>` when a process inventory is available.
 4. Use `outsystems-bpt/templates/process-spec.md` for new or changed processes and `templates/bpt-review-report.md` for reviews.
+
+- Use `references/verification-and-reliability.md` for evidence and domain acceptance checks. Distinguish prepared, validated, merged, published and runtime verified; preserve task scope and existing authorization.

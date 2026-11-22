@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — reliability review (2026-11-22)
+
+- Clarified platform facts versus house/project conventions and verification evidence.
+- Added domain-specific reliability guidance, source provenance and acceptance cases.
+- Added review/template checks and corrected over-broad or inconsistent claims.
+- Added pending-progression handling for event-driven activity closure and behavioral regression checks in CI.
+- Extended repository consistency checks to the new reliability rule IDs and aligned contributor guidance with the full checkout.
+
+
 All notable changes to this skill. Versions follow [semantic versioning](https://semver.org/) of `metadata.version` in `SKILL.md`.
 
 ## 1.2.0 — 2026-11-22

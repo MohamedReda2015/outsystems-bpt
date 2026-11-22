@@ -39,13 +39,13 @@ Every rule has an ID, a severity and a check. Cite the ID in findings. IDs stay 
 | PHA-01 | Blocker | Completing a task re-checks on the server: current user is the assignee (or holds the assigned role/group and it is unclaimed), task open, outcome valid, record in the expected state; ids from the client are only pointers (`SEC-01`, `SEC-09`) | Add the checks to the BL completion action |
 | PHA-02 | Major | Assignment by role/group resolved in BL, with segregation of duties and a fallback group; no hard-coded users `[auto]` | Move to `<Concept>_GetAssignees_Logic` + config |
 | PHA-03 | Major | Every human activity is mirrored in an `<App>Task` row (CS) created in On Ready and closed on completion; inbox/SLA/reports read it, not `Activity` tables | Add the task entity and sync |
-| PHA-04 | Major | One BL use-case action per task outcome/type writes outcome, history and closes the activity in one transaction, returning `ActionResult` | Replace generic "close activity" calls |
+| PHA-04 | Major | One BL use-case action per task outcome/type writes outcome/history and closes the activity under a verified commit plan, returning `ActionResult` | Replace generic "close activity" calls |
 | PHA-05 | Major | Group tasks are claimed before completion; completion uses a row lock or optimistic check so only one completion wins | Add claim + lock |
 | PHA-06 | Major | Notifications from task callbacks go through an outbox; they never fail the activity (`BTX-06`) | Write an outbox row instead of sending |
 | PHA-07 | Major | Reassignment and delegation only via role-checked, audited BL actions | Add `Task_Reassign` with audit |
 | PHA-08 | Major | The inbox is built on the task entity, never on the Taskbox or platform activity tables; Destination is used only on Platform Server 11.8+ (Reactive) and only as navigation to an FE task screen that authorizes through BL `[auto]` | Build inbox + task screens; remove Destination below 11.8 |
 | PHA-09 | Minor | Task titles and descriptions are translatable, not concatenated in the process | Use resources / task type entity |
-| PHA-10 | Major | Human activities are closed synchronously from the completion use case (`Close<HumanActivity>` / `ActivityClose`), not by relying on entity events when the UI moves on; never closed inside their own On Ready `[auto]` | Call the close action in the use case |
+| PHA-10 | Major | Choose explicit close or entity-event progression deliberately; verify commit behavior and handle pending next tasks; never close inside the activity’s own On Ready `[auto]` | Call the close action in the use case |
 
 ## PAA — Automatic activities
 | ID | Sev | Rule | Check / fix |
@@ -112,3 +112,15 @@ Every rule has an ID, a severity and a check. Cite the ID in findings. IDs stay 
 
 ## PLL — Lessons
 `PLL-01` … `PLL-22` are defined in `lessons-learned.md`; cite them as background, not as findings.
+
+
+## Reliability and evidence (2026-11 review)
+
+These manual checks complement, rather than extend the claimed coverage of, the static scripts. Details and acceptance cases: [verification and reliability](verification-and-reliability.md).
+
+| ID | Severity | Rule |
+|---|---|---|
+| PRV-01 | Major | Define owners for business, process, task and notification state, including parallel/cancel outcomes. |
+| PRV-02 | Major | Check and serialize task claims/completion with an explicit transaction boundary map. |
+| PRV-03 | Major | Choose retry ownership, persist attempts correctly and recover paused or stale jobs without duplicate effects. |
+| PRV-04 | Major | Verify in-flight upgrade behavior and evidence for admin recovery operations. |
