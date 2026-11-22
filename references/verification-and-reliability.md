@@ -39,3 +39,11 @@ A process upgrade, termination, retry or replay has business side effects. Scope
 - [Process upgrade](https://github.com/OutSystems/docs-product/blob/master/src/building-apps/processes/process-upgrade/intro.md) and [transaction handling](https://github.com/OutSystems/docs-product/blob/master/src/ref/data/database/handling-transactions.md).
 - Retry counts/intervals quoted from old forum tests are historical observations, not release-independent limits. Verify current settings before sizing throughput or recovery.
 - Anonymized prior-project review, 2026-11-22: waiting/forwarding paths and notifications could not be called complete while dependencies or runtime access remained missing. The acceptance matrix must preserve that distinction.
+
+### Correlation and evidence across a process boundary
+
+Define a correlation key linking the business command, process instance and relevant activity; a business record ID alone may not distinguish a restarted process. State how duplicate, late, out-of-order and wrong-instance signals are handled. Never advance a newer request from an older activity callback just because the business ID matches.
+
+Acceptance observes durable business state and the intended process/activity state after the relevant transaction has committed. Receiving a launch/close response is an intermediate observation. Use bounded waits with a deadline and a diagnostic result; do not convert polling timeout into permission to replay a non-idempotent command. Include cancellation racing with completion and replay after recovery in the test plan.
+
+Handoff the correlation fields, retry owner, reconciliation action and live-instance upgrade policy to the story skill. These are engineering acceptance cases on top of the installed BPT behavior described earlier.

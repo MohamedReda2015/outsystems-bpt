@@ -124,3 +124,10 @@ These manual checks complement, rather than extend the claimed coverage of, the 
 | PRV-02 | Major | Check and serialize task claims/completion with an explicit transaction boundary map. |
 | PRV-03 | Major | Choose retry ownership, persist attempts correctly and recover paused or stale jobs without duplicate effects. |
 | PRV-04 | Major | Verify in-flight upgrade behavior and evidence for admin recovery operations. |
+
+## Cross-skill acceptance
+
+| ID | Severity | Rule | Check |
+|---|---|---|---|
+| PRV-05 | Major | Correlate business commands, process instances and activities; reject stale or wrong-instance signals. | Manual; verification-and-reliability reference. |
+| PRV-06 | Major | Verify durable business and process state with bounded observation, including replay and cancellation races. | Manual; verify against the story acceptance cases. |

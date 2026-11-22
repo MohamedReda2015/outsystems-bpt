@@ -197,3 +197,5 @@ Follow `references/operations-and-versioning.md` §3 — the triage order (proce
 | `references/review-checklist.md` | any review, audit or "is this right?" question |
 | `templates/process-spec.md` · `templates/bpt-review-report.md` | new or changed process; review report |
 | `scripts/check-bpt.mjs` | checking a process inventory JSON (`--json`); format in the script header and `scripts/example_inventory.json` |
+
+For requirement-to-runtime handoffs, also use the cross-skill acceptance section in [verification and reliability](references/verification-and-reliability.md); preserve source/story/criterion IDs and the tested application version.
