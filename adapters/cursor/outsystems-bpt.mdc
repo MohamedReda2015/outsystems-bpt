@@ -1,0 +1,12 @@
+---
+description: OutSystems 11 BPT standards (processes, Light BPT, human/automatic activities, task inbox, retries, process versioning) on the 3-layer canvas and FE->CW->BL->CS. Apply when designing, building, reviewing or debugging OutSystems processes and workflows.
+globs:
+alwaysApply: false
+---
+
+Follow the OutSystems BPT skill in `outsystems-bpt/` (copy that folder into the repository, or adjust the path).
+
+1. Read `outsystems-bpt/SKILL.md` first. Load only the `references/*.md` files the task needs.
+2. The core rules in `outsystems-bpt/adapters/core-rules.md` are always in force.
+3. For reviews, cite rule IDs from `references/review-checklist.md`, and run `node outsystems-bpt/scripts/check-bpt.mjs <inventory.json>` when a process inventory is available.
+4. Use `outsystems-bpt/templates/process-spec.md` for new or changed processes and `templates/bpt-review-report.md` for reviews.

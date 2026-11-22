@@ -1,0 +1,64 @@
+{
+  "skill_name": "outsystems-bpt",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In my OutSystems Reactive app I need purchase requests to be approved by the department manager and then by finance if the amount is above 10,000. Design the workflow.",
+      "expected_output": "Chooses BPT (human steps, branching), places the process in <App>_BL, launches it explicitly from Request_Submit with a duplicate guard and ProcessId stored, ids-only inputs, a task entity + inbox (no Taskbox in Reactive), role/group assignment with segregation of duties, SLAs and escalation, a modeled cancel path, completion use-case actions with server-side checks, and fills the process spec.",
+      "expectations": [
+        "Places the process in a Core BL (or _BPT) module, not the Front-End",
+        "Launches via Launch<Process> inside the BL submit action, not on entity Create of Request",
+        "Passes only RequestId (ids) as process input",
+        "Proposes a task entity and custom inbox because Reactive has no Taskbox",
+        "Requires server-side assignee/role checks when completing a task",
+        "Includes SLA/timeout and cancellation handling",
+        "Cites rule IDs from the skill (e.g. PAR-04, PHA-01, PDS-04)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Every time an Order is created we want to send a confirmation email. A colleague built a BPT process launched on Create of Order with one automatic activity that sends the email. Is that OK?",
+      "expected_output": "Flags single-automatic-activity BPT (PDS-01) and entity-event launch on the business entity (PAR-04/PLT-02); recommends an outbox/event entity with a Light BPT handler or timer, idempotent handler with status/attempts, sweeper and kill switch; mentions data growth (POP-01) and imports launching processes (PLL-01).",
+      "expectations": [
+        "Recommends Light BPT or outbox + timer instead of a regular BPT process",
+        "Recommends triggering on a dedicated event entity rather than Order",
+        "Mentions idempotency and failure status/retry for the handler",
+        "Mentions bulk imports or data growth as a risk"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We need to remove the 'LegalReview' human activity from our ContractApproval process. There are about 200 contracts in flight. Can I just delete it and publish?",
+      "expected_output": "No: running instances continue on the new definition; deleting an activity that holds live instances strands them (PVR-01, PLL-13). Count live instances per activity, route new instances around it, let the old ones drain, remove later; test with in-flight instances; deployment notes with a forward-fix plan.",
+      "expectations": [
+        "Says not to delete an activity that has live instances",
+        "Proposes add/route-new → drain → remove",
+        "Recommends counting live instances per activity before deploying",
+        "Recommends testing against in-flight instances in a non-production environment"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Users say their approval task sometimes doesn't appear in the inbox even though the request shows 'Under review'. Where do I start?",
+      "expected_output": "Follows the triage: launched/ProcessId, process status, current activity status/Error, On Ready creating the task row (e.g. direct email failing in On Ready), assignment rule result, inbox filter; recommends outbox for notifications and monitoring of Error processes.",
+      "expectations": [
+        "Checks the process and activity status (e.g. in Service Center) early",
+        "Checks whether the On Ready callback created the task and whether it failed",
+        "Checks the assignee resolution and the inbox query filter",
+        "Warns against fixing data directly in platform system tables"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Our OutSystems automatic activity calls an external API and sometimes fails. We re-raise the exception so the activity goes to Error. Last month one activity kept failing for days after the API was decommissioned. What should we change?",
+      "expected_output": "Explains the platform retries failed automatic activities until success or termination (no cap); proposes a committed attempt counter in the handler (CommitTransaction before re-raise), a configured MaxAttempts, a failure branch or terminate at the limit, a modeled retry path with Wait timeout as backoff for transient errors, idempotency, correlation logging and monitoring; cites PAA-06, PAA-04, PEX-03.",
+      "expectations": [
+        "States that failed automatic activities are retried indefinitely by the platform",
+        "Proposes an attempt counter that survives the rollback (commit before re-raise or equivalent)",
+        "Routes to a handled failure path at a configured limit",
+        "Mentions idempotency of the step",
+        "Cites PAA-06 or another rule ID from the skill"
+      ]
+    }
+  ]
+}

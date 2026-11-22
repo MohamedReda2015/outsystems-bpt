@@ -1,0 +1,192 @@
+{
+  "appType": "reactive",
+  "processes": [
+    {
+      "name": "Process1",
+      "module": "Requests_Front_End",
+      "light": false,
+      "launch": {
+        "type": "entityEvent",
+        "entity": "Request",
+        "eventEntity": false
+      },
+      "inputs": [
+        {
+          "name": "Request",
+          "type": "Request Record"
+        }
+      ],
+      "hasCancelPath": false,
+      "usesProcessTerminate": true,
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "human",
+          "name": "HumanActivity1",
+          "assignment": "user",
+          "sla": null,
+          "usesDestination": true,
+          "callsBl": [],
+          "inlineData": true,
+          "nodes": 14,
+          "closedBy": "entityEvent",
+          "closesInOnReady": true
+        },
+        {
+          "type": "decision",
+          "name": "Decision1",
+          "branches": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "type": "wait",
+          "name": "Wait1",
+          "timeout": null
+        },
+        {
+          "type": "automatic",
+          "name": "SendToErp",
+          "description": "Calls ERP.",
+          "callsBl": [
+            "Erp_Create",
+            "Request_Update"
+          ],
+          "inlineData": true,
+          "nodes": 12,
+          "longRunning": true,
+          "handlers": [
+            {
+              "type": "AllExceptions",
+              "empty": true
+            }
+          ],
+          "boundedRetry": false
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "name": "NotifyOnRequest",
+      "module": "Requests_CS",
+      "description": "Sends an email on every new request.",
+      "light": false,
+      "launch": {
+        "type": "entityEvent",
+        "entity": "Request",
+        "eventEntity": false
+      },
+      "inputs": [
+        {
+          "name": "RequestId",
+          "type": "Request Identifier",
+          "description": "New request."
+        }
+      ],
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "automatic",
+          "name": "SendEmail",
+          "description": "Sends the email.",
+          "callsBl": [
+            "Request_SendEmail_Logic"
+          ],
+          "nodes": 3,
+          "handlers": [
+            {
+              "type": "AllExceptions",
+              "empty": false,
+              "reraise": false
+            }
+          ]
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "name": "ApproveInvoice",
+      "module": "Invoices_BL",
+      "moduleType": "service",
+      "description": "Approval in a Service module.",
+      "light": false,
+      "launch": {
+        "type": "explicit"
+      },
+      "inputs": [
+        {
+          "name": "InvoiceId",
+          "type": "Invoice Identifier",
+          "description": "Invoice."
+        }
+      ],
+      "hasCancelPath": true,
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "human",
+          "name": "ApproveInvoice",
+          "description": "Approver decides.",
+          "assignment": "role",
+          "sla": "config",
+          "callsBl": [
+            "Task_CreateForActivity_Logic"
+          ],
+          "nodes": 2,
+          "closedBy": "closeAction"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "name": "HandleInvoiceEvent",
+      "module": "Invoices_BL",
+      "description": "Light handler misconfigured.",
+      "light": true,
+      "lightExecutionEnabled": false,
+      "exposeProcessEntity": true,
+      "launch": {
+        "type": "explicit"
+      },
+      "inputs": [
+        {
+          "name": "InvoiceEventId",
+          "type": "InvoiceEvent Identifier",
+          "description": "Event."
+        }
+      ],
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "automatic",
+          "name": "HandleEvent",
+          "description": "Handles the event.",
+          "callsBl": [
+            "InvoiceEvent_Handle_Logic"
+          ],
+          "nodes": 2,
+          "handlers": []
+        },
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ],
+  "platformServer": "11.7.2"
+}

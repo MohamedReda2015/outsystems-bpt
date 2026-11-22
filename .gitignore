@@ -1,0 +1,25 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Build output
+dist/
+*.zip
+*.skill
+
+# Local dependency exports (may contain real module names)
+deps*.local.json
+
+# Local process inventories (may contain real module names)
+inventory*.local.json

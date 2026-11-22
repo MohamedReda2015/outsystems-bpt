@@ -1,0 +1,162 @@
+{
+  "appType": "reactive",
+  "processes": [
+    {
+      "name": "RequestApproval",
+      "module": "Requests_BL",
+      "description": "Reviews and approves a submitted request; sets Request status through BL transitions.",
+      "light": false,
+      "launch": {
+        "type": "explicit"
+      },
+      "inputs": [
+        {
+          "name": "RequestId",
+          "type": "Request Identifier",
+          "description": "The request under approval."
+        }
+      ],
+      "variables": [
+        {
+          "name": "ReviewOutcome",
+          "type": "Text",
+          "description": "Outcome of the last review task."
+        },
+        {
+          "name": "ReworkCount",
+          "type": "Integer",
+          "description": "Times the request returned for information."
+        }
+      ],
+      "hasCancelPath": true,
+      "usesProcessTerminate": false,
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "automatic",
+          "name": "AssignReviewer",
+          "description": "Moves the request to UnderReview.",
+          "callsBl": [
+            "Request_StartReview_Logic"
+          ],
+          "inlineData": false,
+          "nodes": 3,
+          "longRunning": false,
+          "handlers": [
+            {
+              "type": "AllExceptions",
+              "empty": false,
+              "reraise": true
+            }
+          ],
+          "boundedRetry": true
+        },
+        {
+          "type": "human",
+          "name": "ReviewRequest",
+          "description": "Reviewer approves, rejects or asks for information.",
+          "assignment": "role",
+          "sla": "config",
+          "usesDestination": false,
+          "callsBl": [
+            "Task_CreateForActivity_Logic"
+          ],
+          "inlineData": false,
+          "nodes": 3,
+          "closedBy": "closeAction",
+          "closesInOnReady": false
+        },
+        {
+          "type": "decision",
+          "name": "ReviewOutcome",
+          "description": "Routes on the task outcome.",
+          "branches": [
+            "Approved",
+            "Rejected",
+            "NeedsInfo",
+            "Otherwise"
+          ]
+        },
+        {
+          "type": "wait",
+          "name": "WaitForRequesterReply",
+          "description": "Waits for the requester to provide information.",
+          "timeout": "config"
+        },
+        {
+          "type": "conditionalStart",
+          "name": "OnRequestCancelled",
+          "description": "Cleans up open tasks when the request is cancelled."
+        },
+        {
+          "type": "automatic",
+          "name": "NotifyRequester",
+          "description": "Writes the outcome notification to the outbox.",
+          "callsBl": [
+            "Request_NotifyRequester_Logic"
+          ],
+          "inlineData": false,
+          "nodes": 2,
+          "longRunning": false,
+          "handlers": [],
+          "boundedRetry": true
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "moduleType": "reactive",
+      "exposeProcessEntity": false
+    },
+    {
+      "name": "HandleRequestEvent",
+      "module": "Requests_BL",
+      "description": "Light BPT handler for RequestEvent rows.",
+      "light": true,
+      "launch": {
+        "type": "entityEvent",
+        "entity": "RequestEvent",
+        "eventEntity": true
+      },
+      "inputs": [
+        {
+          "name": "RequestEventId",
+          "type": "RequestEvent Identifier",
+          "description": "The event to handle."
+        }
+      ],
+      "activities": [
+        {
+          "type": "start"
+        },
+        {
+          "type": "automatic",
+          "name": "HandleEvent",
+          "description": "Dispatches the event to idempotent step logic.",
+          "callsBl": [
+            "RequestEvent_Handle_Logic"
+          ],
+          "inlineData": false,
+          "nodes": 2,
+          "longRunning": false,
+          "handlers": [
+            {
+              "type": "AllExceptions",
+              "empty": false,
+              "reraise": false
+            }
+          ]
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "moduleType": "service",
+      "lightExecutionEnabled": true,
+      "exposeProcessEntity": false
+    }
+  ],
+  "platformServer": "11.31.0"
+}
