@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["16", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Skill consistency (frontmatter, links, rule IDs, adapters, hygiene)
+        run: node scripts/check_skill.mjs
+
+      - name: Checker regression
+        run: node scripts/test_check_bpt.mjs
+
+      - name: Checker exit codes (clean = 0, bad = 1)
+        run: |
+          node scripts/check-bpt.mjs scripts/example_inventory.json
+          set +e
+          node scripts/check-bpt.mjs scripts/example_inventory_bad.json --json > /dev/null; code=$?
+          set -e
+          [ "$code" = "1" ] || { echo "expected exit 1 for the bad inventory, got $code"; exit 1; }
+
+      - name: Package the skill (smoke test)
+        run: |
+          git archive --format=zip --prefix=outsystems-bpt/ -o outsystems-bpt.zip HEAD
+          unzip -l outsystems-bpt.zip | grep -q "outsystems-bpt/SKILL.md"
+          ! unzip -l outsystems-bpt.zip | grep -q "outsystems-bpt/.github/"
